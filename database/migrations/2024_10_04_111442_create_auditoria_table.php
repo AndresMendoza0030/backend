@@ -10,12 +10,12 @@ class CreateAuditoriaTable extends Migration
     {
         Schema::create('auditoria', function (Blueprint $table) {
             $table->id();
-            $table->timestamp('fecha_hora'); // Momento en que ocurrió la acción
-            $table->string('accion'); // Acción realizada (por ejemplo, 'actualización', 'borrado', etc.)
-            $table->text('detalles')->nullable(); // Detalles adicionales de la acción
-            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade'); // Relacionado con la tabla users
-            $table->foreignId('version_id')->constrained('archivo_version')->onDelete('cascade'); // Relacionado con la tabla archivo_version
-            $table->timestamps(); // created_at y updated_at
+            $table->timestamp('fecha_hora');
+            $table->string('accion');
+            $table->text('detalles')->nullable();
+            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('version_id')->constrained('archivo_version')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 

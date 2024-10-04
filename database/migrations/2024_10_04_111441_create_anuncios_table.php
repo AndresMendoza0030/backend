@@ -11,9 +11,9 @@ class CreateAnunciosTable extends Migration
         Schema::create('anuncios', function (Blueprint $table) {
             $table->id();
             $table->text('texto');
-            $table->string('imagen')->nullable(); // Permite guardar una URL o el nombre del archivo
-            $table->boolean('esta_activo')->default(true); // Indica si el anuncio está activo
-            $table->timestamps(); // Incluye created_at y updated_at automáticamente
+            $table->string('imagen')->nullable();
+            $table->boolean('esta_activo')->default(true);
+            $table->timestamps();
         });
     }
 
