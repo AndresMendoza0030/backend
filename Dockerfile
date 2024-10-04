@@ -18,11 +18,11 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --optimize-autoloader --no-dev
+
 
 RUN cp .env.example .env
 
-RUN php artisan key:generate --ansi
+
 
 RUN php artisan migrate --force
 
