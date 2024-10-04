@@ -6,7 +6,6 @@ use App\Http\Controllers\Auth\UserController;
 use Illuminate\Support\Facades\Route;
 
 
-
 Route::post('/user', [UserController::class, 'store']);
 Route::get('/users', [UserController::class, 'getAllAvailableUsers']);
 Route::post('/login', [UserController::class, 'login']);

@@ -18,8 +18,7 @@ return [
     |
     */
 
-   'driver' => env('SESSION_DRIVER', 'file'),
-
+    'driver' => env('SESSION_DRIVER', 'database'),
 
     /*
     |--------------------------------------------------------------------------
@@ -74,7 +73,7 @@ return [
     |
     */
 
-    'connection' => null,
+    'connection' => env('SESSION_CONNECTION'),
 
     /*
     |--------------------------------------------------------------------------

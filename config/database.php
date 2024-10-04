@@ -16,8 +16,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'pgsql'),
-
+    'default' => env('DB_CONNECTION', 'sqlite'),
 
     /*
     |--------------------------------------------------------------------------
@@ -84,20 +83,19 @@ return [
         ],
 
         'pgsql' => [
-    'driver'   => 'pgsql',
-    'url' => env('DB_URL'),
-
-    'host'     => env('DB_HOST', 'junction.proxy.rlwy.net'),
-    'port'     => env('DB_PORT', '20314'),
-    'database' => env('DB_DATABASE', 'railway'),
-    'username' => env('DB_USERNAME', 'postgres'),
-    'password' => env('DB_PASSWORD', 'QJMJxkFNjRMtUEWOeJQPxHedGhuVZDme'),
-    'charset'  => 'utf8',
-    'prefix'   => '',
-    'schema'   => 'public',
-    'sslmode'  => 'prefer',
-],
-
+            'driver' => 'pgsql',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '5432'),
+            'database' => env('DB_DATABASE', 'laravel'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => 'prefer',
+        ],
 
         'sqlsrv' => [
             'driver' => 'sqlsrv',
@@ -106,7 +104,7 @@ return [
             'port' => env('DB_PORT', '1433'),
             'database' => env('DB_DATABASE', 'laravel'),
             'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', 'QJMJxkFNjRMtUEWOeJQPxHedGhuVZDme'),
+            'password' => env('DB_PASSWORD', ''),
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
