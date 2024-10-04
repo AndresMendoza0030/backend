@@ -24,7 +24,7 @@ RUN cp .env.example .env
 
 
 
-RUN php artisan key:generate --ansi
+
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
