@@ -8,19 +8,19 @@ class CreateCarpetasTable extends Migration
 {
     public function up()
     {
-        Schema::create('carpeta', function (Blueprint $table) {
+        Schema::create('carpetas', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
             $table->foreignId('propietario')->constrained('users')->onDelete('cascade');
-            $table->foreignId('sede_id')->constrained('sede')->onDelete('cascade');
-            $table->foreignId('unidad_id')->constrained('unidad')->onDelete('cascade');
-            $table->foreignId('id_padre')->nullable()->constrained('carpeta')->onDelete('cascade');
+            $table->foreignId('sede_id')->constrained('sedes')->onDelete('cascade');
+            $table->foreignId('unidad_id')->constrained('unidades')->onDelete('cascade');
+            $table->foreignId('id_padre')->nullable()->constrained('carpetas')->onDelete('cascade');
             $table->timestamps();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('carpeta');
+        Schema::dropIfExists('carpetas');
     }
 }

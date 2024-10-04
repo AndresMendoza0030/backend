@@ -11,9 +11,9 @@ class CreateUsuarioxUnidadxCargoxSedeTable extends Migration
         Schema::create('usuarioxunidadxcargoxsede', function (Blueprint $table) {
             $table->id();
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('unidad_id')->constrained('unidad')->onDelete('cascade');
-            $table->foreignId('sede_id')->constrained('sede')->onDelete('cascade');
-            $table->foreignId('cargo_id')->constrained('cargo')->onDelete('cascade');
+            $table->foreignId('unidad_id')->constrained('unidades')->onDelete('cascade');
+            $table->foreignId('sede_id')->constrained('sedes')->onDelete('cascade');
+            $table->foreignId('cargo_id')->constrained('cargos')->onDelete('cascade');
             $table->timestamps();
         });
     }

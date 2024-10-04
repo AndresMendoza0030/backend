@@ -10,7 +10,7 @@ class CreateArchivoVersionTable extends Migration
     {
         Schema::create('archivo_version', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('archivo_id')->constrained('archivo')->onDelete('cascade');
+            $table->foreignId('archivo_id')->constrained('archivos')->onDelete('cascade');
             $table->integer('version');
             $table->timestamp('fecha');
             $table->timestamps();
