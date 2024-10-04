@@ -25,7 +25,7 @@ RUN cp .env.example .env
 
 
 
-RUN php artisan migrate --force
+
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
