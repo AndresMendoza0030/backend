@@ -1,7 +1,7 @@
 {
     "build": {
       "commands": [
-        "composer install --optimize-autoloader --no-dev",
+      
    
         "php artisan config:cache"
       
