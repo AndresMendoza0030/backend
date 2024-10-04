@@ -8,15 +8,18 @@ class CreateAuditoriaTable extends Migration
 {
     public function up()
     {
-        Schema::create('auditoria', function (Blueprint $table) {
-            $table->id();
-            $table->timestamp('fecha_hora');
-            $table->string('accion');
-            $table->text('detalles')->nullable();
-            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('version_id')->constrained('archivo_version')->onDelete('cascade');
-            $table->timestamps();
-        });
+        // Verificar si la tabla ya existe antes de crearla
+        if (!Schema::hasTable('auditoria')) {
+            Schema::create('auditoria', function (Blueprint $table) {
+                $table->id();
+                $table->timestamp('fecha_hora');
+                $table->string('accion');
+                $table->text('detalles')->nullable();
+                $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
+                $table->foreignId('version_id')->constrained('archivo_version')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
     }
 
     public function down()
