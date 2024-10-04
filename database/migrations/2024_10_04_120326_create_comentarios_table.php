@@ -10,7 +10,10 @@ class CreateComentariosTable extends Migration
     {
         Schema::create('comentarios', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('archivo_ver_id')->constrained('archivo_version')->onDelete('cascade');
+            // Explicitar el nombre de la tabla en la clave foránea
+            $table->foreignId('archivo_ver_id')
+                  ->constrained('archivo_version')
+                  ->onDelete('cascade');
             $table->text('comentarios');
             $table->timestamps();
         });
