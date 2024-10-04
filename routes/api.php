@@ -4,7 +4,8 @@ use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Auth\UserController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\FeedbackController;
 
 Route::post('/user', [UserController::class, 'store']);
 Route::get('/users', [UserController::class, 'getAllAvailableUsers']);
@@ -30,3 +31,5 @@ Route::post('/revoke-permission-role', [RoleController::class, 'revokePermission
 Route::post('/assign-role-to-user', [RoleController::class, 'assignRoleToUser']);
 Route::post('/revoke-role-to-user', [RoleController::class, 'revokeRoleToUser']);
 
+Route::post('/add_task', [TaskController::class, 'addTask'])->name('task.add');
+Route::post('/submits_feedback', [FeedbackController::class, 'submitFeedback'])->name('feedback.submit');
