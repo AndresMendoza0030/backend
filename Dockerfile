@@ -22,7 +22,7 @@ COPY . .
 
 RUN cp .env.example .env
 
-RUN composer install --optimize-autoloader --no-dev
+
 
 RUN php artisan key:generate --ansi
 
