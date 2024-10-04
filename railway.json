@@ -1,8 +1,7 @@
 {
     "build": {
       "commands": [
-        "composer install --optimize-autoloader --no-dev",
-        "php artisan key:generate --ansi",
+
         "php artisan migrate --force",
         "php artisan config:cache",
         "php artisan route:cache",
