@@ -40,6 +40,7 @@ class ResetUserPasswordRequest extends FormRequest
             'password.required' => __('common.field_is_required', ['field' => 'contraseña']),
             // email
             'email.email' => __('auth.email'),
+
             // confirmed
             'password.confirmed' => __('auth.password_confirmed'),
             // min

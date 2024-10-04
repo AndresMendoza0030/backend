@@ -12,6 +12,20 @@ class Authenticate
 {
     public function handle(Request $request, Closure $next, ...$guards)
     {
+        $routeUri = $request->path();  // Obtener la URI de la ruta
+
+        // Definir rutas que no requieren autenticación usando la URI
+        $publicUris = [
+            'api/login',
+            'api/password-reset',
+            'api/password-recovery',
+            'password-reset-form'
+        ];
+
+        if (in_array($routeUri, $publicUris)) {
+            return $next($request);
+        }
+
         // Si $guards está vacío, se establece un valor por defecto para Sanctum
         $guards = empty($guards) ? ['sanctum'] : $guards;
 

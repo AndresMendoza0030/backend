@@ -32,7 +32,7 @@ class UserController extends Controller
 
     public function __construct()
     {
-        //$this->middleware([Authenticate::class])->except(['login']);
+        $this->middleware([Authenticate::class]);
         $this->EloquentUser = new EloquentUser();
         $this->EloquentPermission = new EloquentPermission();
     }
@@ -169,10 +169,10 @@ class UserController extends Controller
             );
 
             if ($status == Password::PASSWORD_RESET) {
-                return response()->json(['message' => 'Contraseña reestablecida exitosamente'], 200);
+                return ApiResponse::success([], 'Contraseña reestablecida exitosamente');
             }
 
-            return response()->json(['message' => 'Token no válido o expirado.'], 400);
+            return ApiResponse::error(400, 'Token no válido o expirado.', []);
 
         } catch (\Exception $e) {
 

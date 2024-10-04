@@ -24,7 +24,7 @@ class SendRecoveryPasswordMailRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|string|email',
+            'email' => 'required|string|email|exists:users,email',
         ];
     }
 
@@ -35,6 +35,8 @@ class SendRecoveryPasswordMailRequest extends FormRequest
             'email.required' => __('common.field_is_required', ['field' => 'email']),
             // email
             'email.email' => __('auth.email'),
+            //exists
+            'email.exists' => __('common.must_exists', ['model' => 'usuario']),
         ];
     }
     public function failedValidation(Validator $validator)

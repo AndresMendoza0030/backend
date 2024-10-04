@@ -22,33 +22,43 @@
         <button type="submit">Restablecer Contraseña</button>
     </form>
 </body>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(document).ready(function() {
-    $('#reset-password-form').on('submit', function(event) {
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reset-password-form');
+
+    form.addEventListener('submit', function(event) {
         event.preventDefault(); // Evitar el envío normal del formulario
         
         // Recoger datos del formulario
-        var formData = $(this).serialize(); // Serializa los datos del formulario
+        const formData = new FormData(form); // Recoge los datos del formulario
+        const data = new URLSearchParams(formData); // Serializa los datos
 
-        $.ajax({
-            url: 'https://fya-api.com:8443/api/password-reset', // Cambia esta URL si es necesario
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                // Manejar la respuesta exitosa
-                alert(response.message || 'Contraseña restablecida exitosamente.');
-                // Redirigir o realizar otra acción según sea necesario
+        fetch('https://fya-api.com:8443/api/password-reset', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded' // Como se usa en serialize()
             },
-            error: function(xhr) {
-                console.log(xhr);
-                // Manejar errores
-                if (xhr.status === 419) {
+            body: data
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw response;
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert(data.message || 'Contraseña restablecida exitosamente.');
+            // Redirigir o realizar otra acción según sea necesario
+        })
+        .catch(error => {
+            error.json().then(err => {
+                if (error.status === 419) {
                     alert('El token ha expirado. Por favor, intenta de nuevo.');
                 } else {
                     alert('Ocurrió un error. Intenta nuevamente.');
                 }
-            }
+                console.log(err);
+            });
         });
     });
 });
