@@ -19,6 +19,8 @@ class GoogleController extends Controller
     public function handleGoogleCallback()
     {
         try {
+            $userPermissions = [];
+            $userRoles = [];
             $googleUser = Socialite::driver('google')->stateless()->user();
 
             // Verificar el dominio del correo electrónico
@@ -44,13 +46,38 @@ class GoogleController extends Controller
             } else
                 $user->google_id = $googleUser->id;
 
+            $user
+                ->permissions()?->
+                wherePivot('deleted_at', null)
+                ->chunkMap(function ($permission) use (&$userPermissions) {
+                    if ($permission->deleted_at == null)
+                        $userPermissions[] = ['id' => $permission->permission_id, 'name' => $permission->readable_name];
+                });
+
+            $user
+                ->roles()?->
+                wherePivot('deleted_at', null)
+                ->chunkMap(function ($role) use (&$userRoles) {
+                    if ($role->deleted_at == null)
+                        $userRoles[] = ['id' => $role->role_id, 'name' => $role->name];
+                });
+
             // Iniciar sesión el usuario
             Auth::login($user, true);
 
             // Generar un nuevo token de Sanctum
             $token = $user->createToken('authToken')->plainTextToken;
 
-            return ApiResponse::success(['token' => $token], 'Successful login');
+            return ApiResponse::success
+            (
+                [
+                    'user' => $user,
+                    'permissions' => $userPermissions,
+                    'roles' => $userRoles,
+                    'token' => $token
+                ],
+                'Login exitoso'
+            );
 
         } catch (\Exception $e) {
 
