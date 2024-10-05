@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Raleway', sans-serif;
-            background: url('public/images/background.jpg') no-repeat center center fixed;
+            background: url('/images/background.jpg') no-repeat center center fixed;
             background-size: cover;
             display: flex;
             justify-content: center;
