@@ -15,7 +15,7 @@ return [
   |
   */
 
-  'paths' => ['api/*', 'sanctum/csrf-cookie'],
+  'paths' => ['api/*', 'sanctum/csrf-cookie', 'auth/google/callback'],
   'allowed_methods' => ['*'],
   'allowed_origins' => ['http://fya-api.com', 'http://localhost:3000', 'https://front-production-d41e.up.railway.app'], // Permite estos orígenes
   'allowed_origins_patterns' => [],

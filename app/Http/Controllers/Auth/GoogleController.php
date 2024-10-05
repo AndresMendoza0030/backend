@@ -24,9 +24,9 @@ class GoogleController extends Controller
             $googleUser = Socialite::driver('google')->stateless()->user();
 
             // Verificar el dominio del correo electrónico
-            $emailDomain = substr(strrchr($googleUser->email, "@"), 1); // Extrae el dominio del correo
+            $emailDomain = substr(strrchr($googleUser->email, "@"), 1);
 
-            // if ($emailDomain !== 'feyalegria.com') { // Reemplaza 'tu-dominio.com' por el dominio que quieras verificar
+            // if ($emailDomain !== 'feyalegria.com') {
             //     return response()->json(['error' => 'El dominio del correo no está permitido'], 403);
             // }
 
@@ -43,44 +43,34 @@ class GoogleController extends Controller
                     'google_id' => $googleUser->id,
                     'password' => Hash::make(Str::random(24)),
                 ]);
-            } else
+            } else {
                 $user->google_id = $googleUser->id;
+            }
 
             $user
-                ->permissions()?->
-                wherePivot('deleted_at', null)
+                ->permissions()?->wherePivot('deleted_at', null)
                 ->chunkMap(function ($permission) use (&$userPermissions) {
                     if ($permission->deleted_at == null)
                         $userPermissions[] = ['id' => $permission->permission_id, 'name' => $permission->readable_name];
                 });
 
             $user
-                ->roles()?->
-                wherePivot('deleted_at', null)
+                ->roles()?->wherePivot('deleted_at', null)
                 ->chunkMap(function ($role) use (&$userRoles) {
                     if ($role->deleted_at == null)
                         $userRoles[] = ['id' => $role->role_id, 'name' => $role->name];
                 });
 
-            // Iniciar sesión el usuario
+            // Iniciar sesión al usuario
             Auth::login($user, true);
 
             // Generar un nuevo token de Sanctum
             $token = $user->createToken('authToken')->plainTextToken;
 
-            return ApiResponse::success
-            (
-                [
-                    'user' => $user,
-                    'permissions' => $userPermissions,
-                    'roles' => $userRoles,
-                    'token' => $token
-                ],
-                'Login exitoso'
-            );
+            // Redirigir al frontend con el token en la URL
+            return redirect()->away("https://front-production-d41e.up.railway.app/auth/google/callback?token=$token&permissions=" . json_encode($userPermissions) . "&roles=" . json_encode($userRoles));
 
         } catch (\Exception $e) {
-
             return response()->json(['error' => 'Error al autenticar con Google'], 500);
         }
     }
