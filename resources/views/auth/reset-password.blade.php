@@ -123,7 +123,7 @@
                 const formData = new FormData(form); // Recoge los datos del formulario
                 const data = new URLSearchParams(formData); // Serializa los datos
 
-                fetch('https://fya-api.com:8443/api/password-reset', {
+                fetch('https://backend-production-5e0d.up.railway.app/api/password-reset', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded' // Como se usa en serialize()
