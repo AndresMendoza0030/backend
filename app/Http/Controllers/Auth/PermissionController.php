@@ -71,28 +71,26 @@ class PermissionController extends Controller
         try {
             $nameWithPattern = Misc::transformToPattern($request->input('name'));
             $deletedPermission = $this->EloquentPermission->getDeletedModel($nameWithPattern);
-
-            if ($deletedPermission->isNotEmpty()) {
-
+    
+            // Verificar que el arreglo no esté vacío antes de acceder al índice
+            if ($deletedPermission && $deletedPermission->isNotEmpty()) {
                 $deletedPermission = $deletedPermission[0];
-
                 $this->EloquentPermission->restoreDeletedModel($deletedPermission);
-
+    
                 return ApiResponse::success($deletedPermission, 'Permiso restaurado exitosamente');
             }
-
+    
             $data = ['name' => $nameWithPattern];
-
+    
             return $this->EloquentPermission->create($data);
-
+    
         } catch (PDOException $e) {
             return DatabaseErrorsHandler::handle($e);
         } catch (\Exception $e) {
             return ApiResponse::error(400, $e->getMessage());
         }
-
     }
-
+    
     public function update(UpdatePermissionRequest $request)
     {
         try {
