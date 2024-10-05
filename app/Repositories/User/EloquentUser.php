@@ -41,6 +41,8 @@ class EloquentUser implements RepositoryInterface
      */
     public function delete(Model $model)
     {
+        $model->delete();
+        return $model;
     }
 
     /**
@@ -52,12 +54,12 @@ class EloquentUser implements RepositoryInterface
 
     public function getDeletedModel($parameter)
     {
-        $deletedUser = User::withTrashed()->find($parameter);
+        return User::withTrashed()->find($parameter);
     }
 
     public function restoreDeletedModel(Model $model)
     {
-        // TODO: Implement restoreDeletedModel() method.
+        return $model->restore();
     }
 
     public function getAllByParams($params)

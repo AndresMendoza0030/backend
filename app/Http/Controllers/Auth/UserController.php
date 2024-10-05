@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Middleware\Authenticate;
+use App\Http\Requests\DeactivateUserRequest;
 use App\Http\Requests\ResetUserPasswordRequest;
 use App\Http\Requests\SendRecoveryPasswordMailRequest;
 use App\Http\Requests\StoreUserRequest;
@@ -186,6 +187,38 @@ class UserController extends Controller
         $email = $request->query('email');
 
         return view('auth.reset-password', compact('token', 'email'));
+    }
+
+    function deactivateUser(DeactivateUserRequest $request)
+    {
+        $data = [
+            'id' => $request->input('id')
+        ];
+
+        try {
+
+            $deletedUser = $this->EloquentUser->getDeletedModel($data['id']);
+
+
+            if ($deletedUser->deleted_at != null) {
+
+                $this->EloquentUser->restoreDeletedModel($deletedUser);
+
+                return ApiResponse::success($deletedUser, 'Usuario restaurado exitosamente');
+            }
+
+            $user = $deletedUser;
+
+            $this->EloquentUser->delete($user);
+
+            return ApiResponse::success([], 'Usuario desactivado exitosamente');
+
+        } catch (ModelNotFoundException | PDOException $e) {
+            return DatabaseErrorsHandler::handle($e);
+
+        } catch (\Exception $e) {
+            return ApiResponse::error(400, $e->getMessage());
+        }
     }
 
 }
