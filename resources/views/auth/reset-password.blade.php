@@ -6,6 +6,7 @@
     <title>Restablecer Contraseña</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap">
     <link rel="icon" sizes="192x192" href="https://static.wixstatic.com/media/1cfed0_760e03c630434496be5ba8844d973547%7Emv2.png/v1/fill/w_192%2Ch_192%2Clg_1%2Cusm_0.66_1.00_0.01/1cfed0_760e03c630434496be5ba8844d973547%7Emv2.png" type="image/png"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <style>
         body {
             font-family: 'Raleway', sans-serif;
@@ -95,7 +96,6 @@
     </style>
 </head>
 <body>
-    
     <div class="login-container">
         <h1>Restablecer Contraseña</h1>
         <form id="reset-password-form">
@@ -112,6 +112,7 @@
             <button type="submit" class="submit-button">Restablecer Contraseña</button>
         </form>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('reset-password-form');
@@ -137,16 +138,31 @@
                     return response.json();
                 })
                 .then(data => {
-                    alert(data.message || 'Contraseña restablecida exitosamente.');
-                    // Redirigir o realizar otra acción según sea necesario
+                    // Mostrar mensaje de éxito con Toastify
+                    Toastify({
+                        text: data.message || 'Contraseña restablecida exitosamente.',
+                        duration: 3000, // 3 segundos
+                        close: true,
+                        gravity: "top", // top or bottom
+                        position: "right", // left, center or right
+                        backgroundColor: "#4BB543",
+                    }).showToast();
+
+                    // Redirigir después de un breve tiempo
+                    setTimeout(() => {
+                        window.location.href = 'https://front-production-d41e.up.railway.app/login';
+                    }, 3000); // Esperar 3 segundos antes de redirigir
                 })
                 .catch(error => {
                     error.json().then(err => {
-                        if (error.status === 419) {
-                            alert('El token ha expirado. Por favor, intenta de nuevo.');
-                        } else {
-                            alert('Ocurrió un error. Intenta nuevamente.');
-                        }
+                        Toastify({
+                            text: error.status === 419 ? 'El token ha expirado. Por favor, intenta de nuevo.' : 'Ocurrió un error. Intenta nuevamente.',
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#D10A11",
+                        }).showToast();
                         console.log(err);
                     });
                 });
