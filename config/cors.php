@@ -17,7 +17,7 @@ return [
 
   'paths' => ['api/*', 'sanctum/csrf-cookie', 'auth/google/callback'],
   'allowed_methods' => ['*'],
-  'allowed_origins' => ['http://fya-api.com', 'http://localhost:3000', 'https://front-production-d41e.up.railway.app'], // Permite estos orígenes
+  'allowed_origins' => ['http://fya-api.com', 'http://localhost:3000', 'https://front-production-d41e.up.railway.app','https://backend-production-5e0d.up.railway.app'], // Permite estos orígenes
   'allowed_origins_patterns' => [],
   'allowed_headers' => ['*'],
   'exposed_headers' => [],
