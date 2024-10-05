@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restablecer Contraseña</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap">
+    <link rel="icon" sizes="192x192" href="https://static.wixstatic.com/media/1cfed0_760e03c630434496be5ba8844d973547%7Emv2.png/v1/fill/w_192%2Ch_192%2Clg_1%2Cusm_0.66_1.00_0.01/1cfed0_760e03c630434496be5ba8844d973547%7Emv2.png" type="image/png"/>
     <style>
         body {
             font-family: 'Raleway', sans-serif;
@@ -94,7 +95,7 @@
     </style>
 </head>
 <body>
-    <button class="back-button" onclick="window.location.href='/login'">Volver</button>
+    
     <div class="login-container">
         <h1>Restablecer Contraseña</h1>
         <form id="reset-password-form">
