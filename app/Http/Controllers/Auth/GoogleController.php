@@ -68,7 +68,9 @@ class GoogleController extends Controller
             $token = $user->createToken('authToken')->plainTextToken;
 
             // Redirigir al frontend con el token en la URL
-            return redirect()->away("https://front-production-d41e.up.railway.app/auth/google/callback?token=$token&permissions=" . json_encode($userPermissions) . "&roles=" . json_encode($userRoles));
+           // Redirigir al frontend con el token, permisos, roles y correo en la URL
+return redirect()->away("https://front-production-d41e.up.railway.app/auth/google/callback?token=$token&permissions=" . json_encode($userPermissions) . "&roles=" . json_encode($userRoles) . "&email=" . urlencode($googleUser->email));
+
 
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al autenticar con Google'], 500);
