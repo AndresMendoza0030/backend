@@ -4,7 +4,7 @@ use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Auth\UserController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\BulletinBoardController;
 
 Route::post('/user', [UserController::class, 'store']);
 Route::get('/users', [UserController::class, 'getAllAvailableUsers']);
@@ -31,3 +31,8 @@ Route::post('/revoke-permission-role', [RoleController::class, 'revokePermission
 Route::post('/assign-role-to-user', [RoleController::class, 'assignRoleToUser']);
 Route::post('/revoke-role-to-user', [RoleController::class, 'revokeRoleToUser']);
 
+Route::get('/bulletin-board', [BulletinBoardController::class, 'index']);
+Route::post('/bulletin-board', [BulletinBoardController::class, 'store']);
+Route::get('/bulletin-board/{id}', [BulletinBoardController::class, 'show']);
+Route::put('/bulletin-board/{id}', [BulletinBoardController::class, 'update']);
+Route::delete('/bulletin-board/{id}', [BulletinBoardController::class, 'destroy']);
