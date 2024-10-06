@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BulletinBoard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage; // Importar la fachada Storage
+use Illuminate\Support\Facades\Storage;
 
 class BulletinBoardController extends Controller
 {
@@ -31,23 +31,31 @@ class BulletinBoardController extends Controller
 
             Log::info('Validación completada. Datos validados:', $validated);
 
-            // Procesar y almacenar la imagen (sin manipulación)
+            // Procesar y almacenar la imagen
             if ($request->hasFile('imagen')) {
-                Log::info('Imagen recibida. Procesando el almacenamiento...');
-                // Generar un nombre único para la imagen
-                $imageName = uniqid() . '.' . $request->file('imagen')->extension();
-                // Almacenar la imagen en la carpeta 'public/images'
-                $path = $request->file('imagen')->storeAs('images', $imageName, 'public');
 
-                // Agregar el path de la imagen a los datos validados
-                $validated['imagen'] = $path;
+                // Obtener el nombre del archivo con la extensión
+                $filenameWithExt = $request->file('imagen')->getClientOriginalName();
+
+                // Obtener solo el nombre del archivo
+                $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+
+                // Obtener solo la extensión
+                $extension = $request->file('imagen')->getClientOriginalExtension();
+
+                // Nombre del archivo para almacenar
+                $fileNameToStore = $filename . '_' . time() . '.' . $extension;
+
+                // Subir la imagen
+                $path = $request->file('imagen')->storeAs('public/images', $fileNameToStore);
+
+                // Agregar el nombre del archivo a los datos validados
+                $validated['imagen'] = $fileNameToStore;
+
                 Log::info('Imagen almacenada en:', ['path' => $path]);
             } else {
                 Log::warning('No se encontró el archivo de imagen en la solicitud.');
             }
-
-            // Añadir la línea que deseas probar
-            Storage::disk('local')->put('file.txt', 'Contents');
 
             // Crear el anuncio con los datos validados
             $anuncio = BulletinBoard::create($validated);
@@ -84,12 +92,29 @@ class BulletinBoardController extends Controller
 
         // Procesar y almacenar la nueva imagen si se proporciona
         if ($request->hasFile('imagen')) {
-            // Generar un nombre único para la imagen
-            $imageName = uniqid() . '.' . $request->file('imagen')->extension();
-            // Almacenar la imagen en la carpeta 'public/images'
-            $path = $request->file('imagen')->storeAs('images', $imageName, 'public');
-            // Agregar el path de la imagen a los datos validados
-            $validated['imagen'] = $path;
+
+            // Eliminar la imagen anterior si existe
+            if ($anuncio->imagen) {
+                Storage::delete('public/images/' . $anuncio->imagen);
+            }
+
+            // Obtener el nombre del archivo con la extensión
+            $filenameWithExt = $request->file('imagen')->getClientOriginalName();
+
+            // Obtener solo el nombre del archivo
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+
+            // Obtener solo la extensión
+            $extension = $request->file('imagen')->getClientOriginalExtension();
+
+            // Nombre del archivo para almacenar
+            $fileNameToStore = $filename . '_' . time() . '.' . $extension;
+
+            // Subir la imagen
+            $path = $request->file('imagen')->storeAs('public/images', $fileNameToStore);
+
+            // Agregar el nombre del archivo a los datos validados
+            $validated['imagen'] = $fileNameToStore;
         }
 
         // Actualizar el anuncio con los datos validados
@@ -102,6 +127,12 @@ class BulletinBoardController extends Controller
     public function destroy($id)
     {
         $anuncio = BulletinBoard::findOrFail($id);
+
+        // Eliminar la imagen asociada si existe
+        if ($anuncio->imagen) {
+            Storage::delete('public/images/' . $anuncio->imagen);
+        }
+
         $anuncio->delete();
 
         return response()->json(null, 204);
