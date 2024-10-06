@@ -31,28 +31,26 @@ class BulletinBoardController extends Controller
 
             Log::info('Validación completada. Datos validados:', $validated);
 
-            // Procesar y almacenar la imagen
+            // Procesar y almacenar la imagen usando Storage::disk('local')->put()
             if ($request->hasFile('imagen')) {
+                Log::info('Imagen recibida. Procesando el almacenamiento...');
 
-                // Obtener el nombre del archivo con la extensión
-                $filenameWithExt = $request->file('imagen')->getClientOriginalName();
+                // Obtener el archivo subido
+                $file = $request->file('imagen');
 
-                // Obtener solo el nombre del archivo
-                $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+                // Generar un nombre único para el archivo
+                $filename = uniqid() . '.' . $file->getClientOriginalExtension();
 
-                // Obtener solo la extensión
-                $extension = $request->file('imagen')->getClientOriginalExtension();
+                // Obtener el contenido del archivo
+                $fileContents = file_get_contents($file->getRealPath());
 
-                // Nombre del archivo para almacenar
-                $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-
-                // Subir la imagen
-                $path = $request->file('imagen')->storeAs('public/images', $fileNameToStore);
+                // Almacenar el archivo usando Storage::disk('local')->put()
+                Storage::disk('local')->put('images/' . $filename, $fileContents);
 
                 // Agregar el nombre del archivo a los datos validados
-                $validated['imagen'] = $fileNameToStore;
+                $validated['imagen'] = 'images/' . $filename;
 
-                Log::info('Imagen almacenada en:', ['path' => $path]);
+                Log::info('Imagen almacenada en:', ['path' => 'images/' . $filename]);
             } else {
                 Log::warning('No se encontró el archivo de imagen en la solicitud.');
             }
@@ -71,7 +69,6 @@ class BulletinBoardController extends Controller
             return response()->json(['error' => 'Error al crear el anuncio.'], 500);
         }
     }
-
     // Obtener un anuncio específico
     public function show($id)
     {
