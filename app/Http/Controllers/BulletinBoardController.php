@@ -15,24 +15,24 @@ class BulletinBoardController extends Controller
 
     // Crear un nuevo anuncio
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'titulo' => 'required|string|max:255',
-            'imagen' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'fecha_publicacion' => 'required|date',
-        ]);
-    
-        if ($request->hasFile('imagen')) {
-            // Almacenar la imagen en la carpeta 'public/bulletin_images'
-            $path = $request->file('imagen')->store('bulletin_images', 'public');
-            $validated['imagen_path'] = $path;
-        }
-    
-        $anuncio = BulletinBoard::create($validated);
-    
-        return response()->json($anuncio, 201);
+{
+    $validated = $request->validate([
+        'titulo' => 'required|string|max:255',
+        'imagen' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        'fecha_publicacion' => 'required|date',
+    ]);
+
+    if ($request->hasFile('imagen')) {
+        // Almacenar la imagen en la carpeta 'public/bulletin_images'
+        $path = $request->file('imagen')->store('bulletin_images', 'public');
+        $validated['imagen_path'] = $path;
     }
-    
+
+    $anuncio = BulletinBoard::create($validated);
+
+    return response()->json($anuncio, 201);
+}
+
 
     // Obtener un anuncio específico
     public function show($id)
