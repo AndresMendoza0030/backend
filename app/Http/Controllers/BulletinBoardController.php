@@ -33,18 +33,7 @@ class BulletinBoardController extends Controller
 
             Log::info('Validación completada. Datos validados:', $validated);
 
-            // Revisar si la carpeta de almacenamiento existe, si no, crearla
-            $folderPath = storage_path('app/images');
-            if (!File::exists($folderPath)) {
-                Log::warning('La carpeta de almacenamiento no existe. Intentando crearla...');
-                if (!File::makeDirectory($folderPath, 0755, true)) {
-                    Log::error('No se pudo crear la carpeta de almacenamiento. Verifica permisos.');
-                    return response()->json(['error' => 'No se pudo crear la carpeta de almacenamiento.'], 500);
-                }
-                Log::info('Carpeta de almacenamiento creada correctamente.');
-            }
-
-            // Procesar y almacenar la imagen usando Storage::disk('local')->put()
+            // Procesar y almacenar la imagen usando Storage::disk('public')->put()
             if ($request->hasFile('imagen')) {
                 Log::info('Imagen recibida. Procesando el almacenamiento...');
 
@@ -54,29 +43,32 @@ class BulletinBoardController extends Controller
                 // Generar un nombre único para el archivo
                 $filename = uniqid() . '.' . $file->getClientOriginalExtension();
 
-                // Obtener el contenido del archivo
-                $fileContents = file_get_contents($file->getRealPath());
-
-                // Verificar si tenemos permisos de escritura en la carpeta de almacenamiento
-                if (!is_writable($folderPath)) {
-                    Log::error('La carpeta de almacenamiento no es escribible. Verifica permisos.');
-                    return response()->json(['error' => 'La carpeta de almacenamiento no tiene permisos de escritura.'], 500);
-                }
-
-                // Almacenar el archivo usando Storage::disk('local')->put()
-                Storage::disk('local')->put('images/' . $filename, $fileContents);
+                // Almacenar el archivo usando Storage::disk('public')->put()
+                $filePath = 'images/' . $filename;
+                Storage::disk('public')->put($filePath, file_get_contents($file->getRealPath()));
 
                 // Agregar el nombre del archivo a los datos validados
-                $validated['imagen'] = 'images/' . $filename;
+                $validated['imagen'] = $filePath;
 
-                Log::info('Imagen almacenada en:', ['path' => 'images/' . $filename]);
+                Log::info('Imagen almacenada en:', ['path' => $filePath]);
             } else {
                 Log::warning('No se encontró el archivo de imagen en la solicitud.');
                 return response()->json(['error' => 'No se encontró el archivo de imagen.'], 400);
             }
 
+            // Verificar que el campo 'imagen' esté presente en los datos validados antes de crear el anuncio
+            if (!isset($validated['imagen'])) {
+                Log::error('El campo de imagen no está presente en los datos validados.');
+                return response()->json(['error' => 'El campo de imagen es requerido.'], 400);
+            }
+
             // Crear el anuncio con los datos validados
-            $anuncio = BulletinBoard::create($validated);
+            $anuncio = new BulletinBoard();
+            $anuncio->titulo = $validated['titulo'];
+            $anuncio->imagen = $validated['imagen'];
+            $anuncio->fecha_publicacion = $validated['fecha_publicacion'];
+            $anuncio->save();
+
             Log::info('Anuncio creado exitosamente:', ['anuncio' => $anuncio]);
 
             return response()->json($anuncio, 201);
@@ -113,18 +105,18 @@ class BulletinBoardController extends Controller
             if ($request->hasFile('imagen')) {
 
                 // Eliminar la imagen anterior si existe
-                if ($anuncio->imagen && Storage::disk('local')->exists($anuncio->imagen)) {
-                    Storage::delete($anuncio->imagen);
+                if ($anuncio->imagen && Storage::disk('public')->exists($anuncio->imagen)) {
+                    Storage::disk('public')->delete($anuncio->imagen);
                 }
 
                 // Obtener el archivo subido
                 $file = $request->file('imagen');
                 $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-                $fileContents = file_get_contents($file->getRealPath());
+                $filePath = 'images/' . $filename;
 
                 // Almacenar la nueva imagen
-                Storage::disk('local')->put('images/' . $filename, $fileContents);
-                $validated['imagen'] = 'images/' . $filename;
+                Storage::disk('public')->put($filePath, file_get_contents($file->getRealPath()));
+                $validated['imagen'] = $filePath;
             }
 
             // Actualizar el anuncio con los datos validados
@@ -149,8 +141,8 @@ class BulletinBoardController extends Controller
             $anuncio = BulletinBoard::findOrFail($id);
 
             // Eliminar la imagen asociada si existe
-            if ($anuncio->imagen && Storage::disk('local')->exists($anuncio->imagen)) {
-                Storage::delete($anuncio->imagen);
+            if ($anuncio->imagen && Storage::disk('public')->exists($anuncio->imagen)) {
+                Storage::disk('public')->delete($anuncio->imagen);
             }
 
             $anuncio->delete();
