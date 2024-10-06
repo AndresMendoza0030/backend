@@ -6,6 +6,8 @@ use App\Models\BulletinBoard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
 
 class BulletinBoardController extends Controller
 {
@@ -31,6 +33,17 @@ class BulletinBoardController extends Controller
 
             Log::info('Validación completada. Datos validados:', $validated);
 
+            // Revisar si la carpeta de almacenamiento existe, si no, crearla
+            $folderPath = storage_path('app/images');
+            if (!File::exists($folderPath)) {
+                Log::warning('La carpeta de almacenamiento no existe. Intentando crearla...');
+                if (!File::makeDirectory($folderPath, 0755, true)) {
+                    Log::error('No se pudo crear la carpeta de almacenamiento. Verifica permisos.');
+                    return response()->json(['error' => 'No se pudo crear la carpeta de almacenamiento.'], 500);
+                }
+                Log::info('Carpeta de almacenamiento creada correctamente.');
+            }
+
             // Procesar y almacenar la imagen usando Storage::disk('local')->put()
             if ($request->hasFile('imagen')) {
                 Log::info('Imagen recibida. Procesando el almacenamiento...');
@@ -44,6 +57,12 @@ class BulletinBoardController extends Controller
                 // Obtener el contenido del archivo
                 $fileContents = file_get_contents($file->getRealPath());
 
+                // Verificar si tenemos permisos de escritura en la carpeta de almacenamiento
+                if (!is_writable($folderPath)) {
+                    Log::error('La carpeta de almacenamiento no es escribible. Verifica permisos.');
+                    return response()->json(['error' => 'La carpeta de almacenamiento no tiene permisos de escritura.'], 500);
+                }
+
                 // Almacenar el archivo usando Storage::disk('local')->put()
                 Storage::disk('local')->put('images/' . $filename, $fileContents);
 
@@ -53,6 +72,7 @@ class BulletinBoardController extends Controller
                 Log::info('Imagen almacenada en:', ['path' => 'images/' . $filename]);
             } else {
                 Log::warning('No se encontró el archivo de imagen en la solicitud.');
+                return response()->json(['error' => 'No se encontró el archivo de imagen.'], 400);
             }
 
             // Crear el anuncio con los datos validados
@@ -69,6 +89,7 @@ class BulletinBoardController extends Controller
             return response()->json(['error' => 'Error al crear el anuncio.'], 500);
         }
     }
+
     // Obtener un anuncio específico
     public function show($id)
     {
@@ -78,60 +99,68 @@ class BulletinBoardController extends Controller
     // Actualizar un anuncio existente
     public function update(Request $request, $id)
     {
-        $anuncio = BulletinBoard::findOrFail($id);
+        try {
+            $anuncio = BulletinBoard::findOrFail($id);
 
-        // Validar los datos de la solicitud
-        $validated = $request->validate([
-            'titulo' => 'sometimes|string|max:255',
-            'imagen' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'fecha_publicacion' => 'sometimes|date',
-        ]);
+            // Validar los datos de la solicitud
+            $validated = $request->validate([
+                'titulo' => 'sometimes|string|max:255',
+                'imagen' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'fecha_publicacion' => 'sometimes|date',
+            ]);
 
-        // Procesar y almacenar la nueva imagen si se proporciona
-        if ($request->hasFile('imagen')) {
+            // Procesar y almacenar la nueva imagen si se proporciona
+            if ($request->hasFile('imagen')) {
 
-            // Eliminar la imagen anterior si existe
-            if ($anuncio->imagen) {
-                Storage::delete('public/images/' . $anuncio->imagen);
+                // Eliminar la imagen anterior si existe
+                if ($anuncio->imagen && Storage::disk('local')->exists($anuncio->imagen)) {
+                    Storage::delete($anuncio->imagen);
+                }
+
+                // Obtener el archivo subido
+                $file = $request->file('imagen');
+                $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+                $fileContents = file_get_contents($file->getRealPath());
+
+                // Almacenar la nueva imagen
+                Storage::disk('local')->put('images/' . $filename, $fileContents);
+                $validated['imagen'] = 'images/' . $filename;
             }
 
-            // Obtener el nombre del archivo con la extensión
-            $filenameWithExt = $request->file('imagen')->getClientOriginalName();
+            // Actualizar el anuncio con los datos validados
+            $anuncio->update($validated);
+            Log::info('Anuncio actualizado exitosamente:', ['anuncio' => $anuncio]);
 
-            // Obtener solo el nombre del archivo
-            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-
-            // Obtener solo la extensión
-            $extension = $request->file('imagen')->getClientOriginalExtension();
-
-            // Nombre del archivo para almacenar
-            $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-
-            // Subir la imagen
-            $path = $request->file('imagen')->storeAs('public/images', $fileNameToStore);
-
-            // Agregar el nombre del archivo a los datos validados
-            $validated['imagen'] = $fileNameToStore;
+            return response()->json($anuncio, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Error de validación:', ['errors' => $e->errors()]);
+            return response()->json(['error' => 'Error de validación.', 'details' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar el anuncio: ' . $e->getMessage());
+            Log::error('Detalles del stack trace:', ['trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => 'Error al actualizar el anuncio.'], 500);
         }
-
-        // Actualizar el anuncio con los datos validados
-        $anuncio->update($validated);
-
-        return response()->json($anuncio, 200);
     }
 
     // Eliminar un anuncio
     public function destroy($id)
     {
-        $anuncio = BulletinBoard::findOrFail($id);
+        try {
+            $anuncio = BulletinBoard::findOrFail($id);
 
-        // Eliminar la imagen asociada si existe
-        if ($anuncio->imagen) {
-            Storage::delete('public/images/' . $anuncio->imagen);
+            // Eliminar la imagen asociada si existe
+            if ($anuncio->imagen && Storage::disk('local')->exists($anuncio->imagen)) {
+                Storage::delete($anuncio->imagen);
+            }
+
+            $anuncio->delete();
+            Log::info('Anuncio eliminado exitosamente.', ['id' => $id]);
+
+            return response()->json(null, 204);
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar el anuncio: ' . $e->getMessage());
+            Log::error('Detalles del stack trace:', ['trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => 'Error al eliminar el anuncio.'], 500);
         }
-
-        $anuncio->delete();
-
-        return response()->json(null, 204);
     }
 }
