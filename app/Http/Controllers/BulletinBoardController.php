@@ -47,10 +47,10 @@ class BulletinBoardController extends Controller
                 $filePath = 'images/' . $filename;
                 Storage::disk('public')->put($filePath, file_get_contents($file->getRealPath()));
 
-                // Agregar el nombre del archivo a los datos validados
-                $validated['imagen'] = $filePath;
+                // Agregar la URL completa de la imagen a los datos validados
+                $validated['imagen'] = 'https://backend-production-5e0d.up.railway.app/storage/' . $filePath;
 
-                Log::info('Imagen almacenada en:', ['path' => $filePath]);
+                Log::info('Imagen almacenada en:', ['path' => $validated['imagen']]);
             } else {
                 Log::warning('No se encontró el archivo de imagen en la solicitud.');
                 return response()->json(['error' => 'No se encontró el archivo de imagen.'], 400);
@@ -116,7 +116,7 @@ class BulletinBoardController extends Controller
 
                 // Almacenar la nueva imagen
                 Storage::disk('public')->put($filePath, file_get_contents($file->getRealPath()));
-                $validated['imagen'] = $filePath;
+                $validated['imagen'] = 'https://backend-production-5e0d.up.railway.app/storage/' . $filePath;
             }
 
             // Actualizar el anuncio con los datos validados
