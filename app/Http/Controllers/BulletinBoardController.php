@@ -32,7 +32,7 @@ class BulletinBoardController extends Controller
             if ($request->hasFile('imagen')) {
                 Log::info('Imagen recibida. Procesando el almacenamiento...');
                 // Almacenar la imagen en la carpeta 'public/bulletin_images'
-                $path = $request->file('imagen')->store('bulletin_images', 'public');
+                $path = $request->file('imagen')->store('images', 'public');
                 $validated['imagen_path'] = $path;
                 Log::info('Imagen almacenada en:', $path);
             } else {
