@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class BulletinBoard extends Model
 {
@@ -13,7 +14,13 @@ class BulletinBoard extends Model
 
     protected $fillable = [
         'titulo',
-        'imagen',
+        'imagen_path',
         'fecha_publicacion',
     ];
+
+    // Accessor para la imagen URL completa
+    public function getImagenUrlAttribute()
+    {
+        return $this->imagen_path ? Storage::url($this->imagen_path) : null;
+    }
 }

@@ -23,6 +23,7 @@ class BulletinBoardController extends Controller
         ]);
     
         if ($request->hasFile('imagen')) {
+            // Almacenar la imagen en la carpeta 'public/bulletin_images'
             $path = $request->file('imagen')->store('bulletin_images', 'public');
             $validated['imagen_path'] = $path;
         }
