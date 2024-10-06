@@ -100,7 +100,7 @@ class BulletinBoardController extends Controller
             // Validar los datos de la solicitud
             $validated = $request->validate([
                 'titulo' => 'sometimes|string|max:255',
-                'imagen' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'imagen' => 'sometimes|image|mimes:jpeg,webp,png,jpg,gif,svg|max:2048',
                 'fecha_publicacion' => 'sometimes|date',
             ]);
 
