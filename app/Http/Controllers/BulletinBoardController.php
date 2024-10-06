@@ -49,6 +49,7 @@ class BulletinBoardController extends Controller
 
                 // Agregar la URL completa de la imagen a los datos validados
                 $validated['imagen'] = 'https://backend-production-5e0d.up.railway.app/storage/' . $filePath;
+                $validated['image_path'] = $validated['imagen'];
 
                 Log::info('Imagen almacenada en:', ['path' => $validated['imagen']]);
             } else {
@@ -66,12 +67,14 @@ class BulletinBoardController extends Controller
             $anuncio = new BulletinBoard();
             $anuncio->titulo = $validated['titulo'];
             $anuncio->imagen = $validated['imagen'];
+            $anuncio->image_path = $validated['image_path'];
             $anuncio->fecha_publicacion = $validated['fecha_publicacion'];
             $anuncio->save();
 
             Log::info('Anuncio creado exitosamente:', ['anuncio' => $anuncio]);
 
-            return response()->json($anuncio, 201);
+            return response()->json(['success' => true, 'message' => 'Anuncio creado exitosamente.', 'data' => $anuncio], 201);
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Error de validación:', ['errors' => $e->errors()]);
             return response()->json(['error' => 'Error de validación.', 'details' => $e->errors()], 422);
@@ -117,13 +120,15 @@ class BulletinBoardController extends Controller
                 // Almacenar la nueva imagen
                 Storage::disk('public')->put($filePath, file_get_contents($file->getRealPath()));
                 $validated['imagen'] = 'https://backend-production-5e0d.up.railway.app/storage/' . $filePath;
+                $validated['image_path'] = $validated['imagen'];
             }
 
             // Actualizar el anuncio con los datos validados
             $anuncio->update($validated);
             Log::info('Anuncio actualizado exitosamente:', ['anuncio' => $anuncio]);
 
-            return response()->json($anuncio, 200);
+            return response()->json(['success' => true, 'message' => 'Anuncio actualizado exitosamente.', 'data' => $anuncio], 200);
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Error de validación:', ['errors' => $e->errors()]);
             return response()->json(['error' => 'Error de validación.', 'details' => $e->errors()], 422);
@@ -148,7 +153,8 @@ class BulletinBoardController extends Controller
             $anuncio->delete();
             Log::info('Anuncio eliminado exitosamente.', ['id' => $id]);
 
-            return response()->json(null, 204);
+            return response()->json(['success' => true, 'message' => 'Anuncio eliminado exitosamente.'], 204);
+
         } catch (\Exception $e) {
             Log::error('Error al eliminar el anuncio: ' . $e->getMessage());
             Log::error('Detalles del stack trace:', ['trace' => $e->getTraceAsString()]);
