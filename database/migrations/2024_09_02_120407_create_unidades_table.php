@@ -8,11 +8,13 @@ class CreateUnidadesTable extends Migration
 {
     public function up()
     {
-        Schema::create('unidades', function (Blueprint $table) {
-            $table->id();
-            $table->string('nombre');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('unidades')) {
+            Schema::create('unidades', function (Blueprint $table) {
+                $table->id();
+                $table->string('nombre');
+                $table->timestamps();
+            });
+        }
     }
 
     public function down()
