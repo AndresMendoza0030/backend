@@ -18,14 +18,20 @@ class BulletinBoardController extends Controller
     {
         $validated = $request->validate([
             'titulo' => 'required|string|max:255',
-            'imagen' => 'required|string',
+            'imagen' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'fecha_publicacion' => 'required|date',
         ]);
-
+    
+        if ($request->hasFile('imagen')) {
+            $path = $request->file('imagen')->store('bulletin_images', 'public');
+            $validated['imagen_path'] = $path;
+        }
+    
         $anuncio = BulletinBoard::create($validated);
-
+    
         return response()->json($anuncio, 201);
     }
+    
 
     // Obtener un anuncio específico
     public function show($id)
