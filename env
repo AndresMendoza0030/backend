@@ -1,5 +1,5 @@
 APP_NAME="FYA"
-APP_ENV="production"
+APP_ENV="local"
 APP_KEY="base64:y3zR5HLJpvRXpJ7xpZgwN8wa83BCwDl0JCoxxkJDRUY="
 APP_DEBUG="true"
 APP_TIMEZONE="UTC"
