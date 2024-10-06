@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BulletinBoard;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class BulletinBoardController extends Controller
 {
@@ -15,24 +16,42 @@ class BulletinBoardController extends Controller
 
     // Crear un nuevo anuncio
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'titulo' => 'required|string|max:255',
-        'imagen' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'fecha_publicacion' => 'required|date',
-    ]);
-
-    if ($request->hasFile('imagen')) {
-        // Almacenar la imagen en la carpeta 'public/bulletin_images'
-        $path = $request->file('imagen')->store('bulletin_images', 'public');
-        $validated['imagen_path'] = $path;
+    {
+        try {
+            Log::info('Iniciando el almacenamiento de un nuevo anuncio...');
+            Log::info('Datos de la solicitud:', $request->all());
+    
+            $validated = $request->validate([
+                'titulo' => 'required|string|max:255',
+                'imagen' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'fecha_publicacion' => 'required|date',
+            ]);
+    
+            Log::info('Validación completada. Datos validados:', $validated);
+    
+            if ($request->hasFile('imagen')) {
+                Log::info('Imagen recibida. Procesando el almacenamiento...');
+                // Almacenar la imagen en la carpeta 'public/bulletin_images'
+                $path = $request->file('imagen')->store('bulletin_images', 'public');
+                $validated['imagen_path'] = $path;
+                Log::info('Imagen almacenada en:', $path);
+            } else {
+                Log::warning('No se encontró el archivo de imagen en la solicitud.');
+            }
+    
+            $anuncio = BulletinBoard::create($validated);
+            Log::info('Anuncio creado exitosamente:', $anuncio);
+    
+            return response()->json($anuncio, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Error de validación:', $e->errors());
+            return response()->json(['error' => 'Error de validación.', 'details' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Error al crear el anuncio: ' . $e->getMessage());
+            Log::error('Detalles del stack trace:', ['trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => 'Error al crear el anuncio.'], 500);
+        }
     }
-
-    $anuncio = BulletinBoard::create($validated);
-
-    return response()->json($anuncio, 201);
-}
-
 
     // Obtener un anuncio específico
     public function show($id)
