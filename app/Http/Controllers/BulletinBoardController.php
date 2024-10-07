@@ -6,11 +6,18 @@ use App\Models\BulletinBoard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Response;
-
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 class BulletinBoardController extends Controller
 {
+    protected $imageManager;
+
+    public function __construct()
+    {
+        // Inicializar el ImageManager
+        $this->imageManager =  new ImageManager(Driver::class);
+    }
+
     // Obtener todos los anuncios
     public function index()
     {
@@ -26,26 +33,35 @@ class BulletinBoardController extends Controller
 
             // Validar los datos de la solicitud
             $validated = $request->validate([
-                'titulo' => 'required|string|max:255',
-                'imagen' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+                'titulo'            => 'required|string|max:255',
+                'imagen'            => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
                 'fecha_publicacion' => 'required|date',
             ]);
 
             Log::info('Validación completada. Datos validados:', $validated);
 
-            // Procesar y almacenar la imagen usando Storage::disk('public')->put()
+            // Procesar y almacenar la imagen usando ImageManager
             if ($request->hasFile('imagen')) {
                 Log::info('Imagen recibida. Procesando el almacenamiento...');
 
                 // Obtener el archivo subido
                 $file = $request->file('imagen');
 
+                // Crear la imagen usando ImageManager
+                $image = $this->imageManager->read($file->getRealPath());
+
+                // Redimensionar la imagen
+                $image->resize(1024, 768, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+
                 // Generar un nombre único para el archivo
                 $filename = uniqid() . '.' . $file->getClientOriginalExtension();
 
-                // Almacenar el archivo usando Storage::disk('public')->put()
+                // Guardar la imagen redimensionada en el disco
                 $filePath = 'images/' . $filename;
-                Storage::disk('public')->put($filePath, file_get_contents($file->getRealPath()));
+                Storage::disk('public')->put($filePath, (string) $image->encode());
 
                 // Agregar la URL completa de la imagen a los datos validados
                 $validated['imagen'] = 'https://backend-production-5e0d.up.railway.app/storage/' . $filePath;
@@ -54,12 +70,6 @@ class BulletinBoardController extends Controller
             } else {
                 Log::warning('No se encontró el archivo de imagen en la solicitud.');
                 return response()->json(['error' => 'No se encontró el archivo de imagen.'], 400);
-            }
-
-            // Verificar que el campo 'imagen' esté presente en los datos validados antes de crear el anuncio
-            if (!isset($validated['imagen'])) {
-                Log::error('El campo de imagen no está presente en los datos validados.');
-                return response()->json(['error' => 'El campo de imagen es requerido.'], 400);
             }
 
             // Crear el anuncio con los datos validados
@@ -96,14 +106,13 @@ class BulletinBoardController extends Controller
 
             // Validar los datos de la solicitud
             $validated = $request->validate([
-                'titulo' => 'sometimes|string|max:255',
-                'imagen' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+                'titulo'            => 'sometimes|string|max:255',
+                'imagen'            => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
                 'fecha_publicacion' => 'sometimes|date',
             ]);
 
             // Procesar y almacenar la nueva imagen si se proporciona
             if ($request->hasFile('imagen')) {
-
                 // Eliminar la imagen anterior si existe
                 if ($anuncio->imagen && Storage::disk('public')->exists($anuncio->imagen)) {
                     Storage::disk('public')->delete($anuncio->imagen);
@@ -111,11 +120,24 @@ class BulletinBoardController extends Controller
 
                 // Obtener el archivo subido
                 $file = $request->file('imagen');
-                $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-                $filePath = 'images/' . $filename;
 
-                // Almacenar la nueva imagen
-                Storage::disk('public')->put($filePath, file_get_contents($file->getRealPath()));
+                // Crear la imagen usando ImageManager
+                $image = $this->imageManager->read($file->getRealPath());
+
+                // Redimensionar la imagen
+                $image->resize(1024, 768, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+
+                // Generar un nombre único para el archivo
+                $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+
+                // Guardar la imagen redimensionada en el disco
+                $filePath = 'images/' . $filename;
+                Storage::disk('public')->put($filePath, (string) $image->encode());
+
+                // Agregar la URL completa de la imagen a los datos validados
                 $validated['imagen'] = 'https://backend-production-5e0d.up.railway.app/storage/' . $filePath;
             }
 

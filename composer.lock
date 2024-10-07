@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cafefb8992088deb0111ec7bd339ed92",
+    "content-hash": "7d44821cc2345e0128dfed3509a0363f",
     "packages": [
         {
             "name": "brick/math",
@@ -1183,7 +1183,7 @@
         },
         {
             "name": "intervention/image",
-            "version": "dev-main",
+            "version": "3.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Intervention/image.git",
@@ -8901,9 +8901,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "intervention/image": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
