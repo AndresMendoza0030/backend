@@ -22,7 +22,6 @@ class BulletinBoardController extends Controller
     {
         try {
             Log::info('Iniciando el almacenamiento de un nuevo anuncio...');
-            Log::info('Datos de la solicitud:', $request->all());
 
             // Validar los datos de la solicitud
             $validated = $request->validate([
@@ -31,8 +30,6 @@ class BulletinBoardController extends Controller
                 'fecha_publicacion' => 'required|date',
             ]);
 
-            Log::info('Validación completada. Datos validados:', $validated);
-
             // Procesar y almacenar la imagen usando Storage::disk('public')->put()
             if ($request->hasFile('imagen')) {
                 Log::info('Imagen recibida. Procesando el almacenamiento...');
@@ -40,17 +37,22 @@ class BulletinBoardController extends Controller
                 // Obtener el archivo subido
                 $file = $request->file('imagen');
 
+                // Redimensionar la imagen utilizando Intervention Image
+                $image = Image::make($file)->resize(1024, 768, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+
                 // Generar un nombre único para el archivo
                 $filename = uniqid() . '.' . $file->getClientOriginalExtension();
 
-                // Almacenar el archivo usando Storage::disk('public')->put()
+                // Guardar la imagen redimensionada en el disco
                 $filePath = 'images/' . $filename;
-                Storage::disk('public')->put($filePath, file_get_contents($file->getRealPath()));
+                Storage::disk('public')->put($filePath, (string) $image->encode());
 
                 // Agregar la URL completa de la imagen a los datos validados
                 $validated['imagen'] = 'https://backend-production-5e0d.up.railway.app/storage/' . $filePath;
-
-                Log::info('Imagen almacenada en:', ['path' => $validated['imagen']]);
+                Log::info('Imagen almacenada y redimensionada en:', ['path' => $validated['imagen']]);
             } else {
                 Log::warning('No se encontró el archivo de imagen en la solicitud.');
                 return response()->json(['error' => 'No se encontró el archivo de imagen.'], 400);
