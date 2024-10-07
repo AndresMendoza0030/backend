@@ -6,7 +6,6 @@ use App\Utils\ApiResponse;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Support\Facades\Log;
 
 class ResetUserPasswordRequest extends FormRequest
 {
