@@ -43,7 +43,7 @@ class PasswordRecoveryMail extends Mailable
     {
         // Genera manualmente el enlace con tu propia ruta de API
         $resetUrl = url("/password-reset-form?token={$this->token}&email={$this->email}");
-        \Log::info("Reset URL: {$resetUrl}"); // Agregar esto para depurar
+       
 
         return new Content(
             view: 'auth.password-recovery',
